@@ -24,12 +24,12 @@
     <section class="hero">
       <div class="eyebrow">BSA EPFL Stablecoins Hackathon</div>
       <h1>ENS Pay</h1>
-      <p class="subtitle">Resolve an ENS name, open a TON wallet, and send a clean wallet-native invoice from inside Telegram.</p>
+      <p class="subtitle">Resolve an ENS name, open a TON testnet wallet, and send a clean wallet-native invoice from inside Telegram.</p>
     </section>
 
     <section class="card">
       <div id="ton-connect"></div>
-      <div class="status" id="walletStatus">Connect a TON wallet to send the payment from this Mini App.</div>
+      <div class="status" id="walletStatus">Connect a TON testnet wallet to send the payment from this Mini App.</div>
     </section>
 
     <section class="card">
@@ -44,7 +44,7 @@
     <section id="invoiceCard" class="card hidden">
       <div class="invoice-head">
         <div><p class="eyebrow">TON Invoice</p><h2 class="invoice-title" id="invoiceTitle">Pay to vitalik.eth</h2></div>
-        <div class="pill">TON Mainnet</div>
+        <div class="pill">TON Testnet</div>
       </div>
       <div class="meta">
         <div class="meta-row"><span>ENS</span><span id="ensValue"></span></div>
@@ -75,7 +75,7 @@
 
   <script>
     const tg=window.Telegram.WebApp;tg.expand();tg.ready();
-    const CONFIG={tonRecipient:"UQA1y_vDKWgcJPxTLcXWPqceNrZaXQoqMdAyL_hQyK6qb_hf",rpcUrls:["https://eth.llamarpc.com","https://ethereum.publicnode.com"],tonExplorer:"https://tonviewer.com",botUsername:""};
+    const CONFIG={tonRecipient:"0QCvjvVIoo3NWvisxHDkN8yL_HpZIZ23V1cYnB8Td7oEzDYi",rpcUrls:["https://eth.llamarpc.com","https://ethereum.publicnode.com"],tonNetwork:"-3",tonExplorer:"https://testnet.tonviewer.com",botUsername:""};
     const state={ens:"",amount:"",resolvedAddress:"",tonLink:"",receipt:""};
     const els={ensInput:document.getElementById("ensInput"),amountInput:document.getElementById("amountInput"),resolveBtn:document.getElementById("resolveBtn"),status:document.getElementById("status"),walletStatus:document.getElementById("walletStatus"),invoiceCard:document.getElementById("invoiceCard"),invoiceTitle:document.getElementById("invoiceTitle"),ensValue:document.getElementById("ensValue"),resolvedValue:document.getElementById("resolvedValue"),tonValue:document.getElementById("tonValue"),amountValue:document.getElementById("amountValue"),qrImage:document.getElementById("qrImage"),copyLinkBtn:document.getElementById("copyLinkBtn"),resetBtn:document.getElementById("resetBtn"),receiptCard:document.getElementById("receiptCard"),receiptOutput:document.getElementById("receiptOutput")};
     const cloudGet=key=>new Promise(resolve=>tg.CloudStorage.getItem(key,(_e,v)=>resolve(v||"")));
@@ -93,9 +93,9 @@
     function showInvoice(){state.tonLink=buildTonLink();els.invoiceCard.classList.remove("hidden");els.receiptCard.classList.remove("hidden");els.invoiceTitle.textContent=`Pay ${formatTon(state.amount)} to ${state.ens}`;els.ensValue.textContent=state.ens;els.resolvedValue.textContent=shorten(state.resolvedAddress);els.tonValue.textContent=shorten(CONFIG.tonRecipient);els.amountValue.textContent=formatTon(state.amount);els.qrImage.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(state.tonLink)}`;tg.MainButton.setText(`Pay ${formatTon(state.amount)} to ${state.ens}`);tg.MainButton.show();}
     async function persistInvoice(){await cloudSet("enspay:last_invoice",JSON.stringify(state));}
     async function resetFlow(){Object.assign(state,{ens:"",amount:"",resolvedAddress:"",tonLink:"",receipt:""});els.ensInput.value="";els.amountInput.value="";els.invoiceCard.classList.add("hidden");els.receiptCard.classList.add("hidden");setStatus("");setReceiptStatus("");tg.MainButton.hide();await cloudSet("enspay:last_invoice","");await cloudSet("enspay:last_receipt","");}
-    async function handleResolve(){const ens=els.ensInput.value.trim().toLowerCase(),amount=els.amountInput.value.trim();if(!ens.endsWith(".eth"))return setStatus("Enter a valid .eth name.","error");if(!amount||Number(amount)<=0)return setStatus("Enter a valid TON amount.","error");setStatus(`Resolving ${ens}...`);els.resolveBtn.disabled=true;try{state.ens=ens;state.amount=amount;state.resolvedAddress=await resolveEns(ens);showInvoice();await persistInvoice();setStatus(`Resolved ${ens}. Ready for TON payment.`,"ok");}catch(_e){setStatus("Could not resolve this ENS name right now. Try vitalik.eth.","error");}finally{els.resolveBtn.disabled=false;}}
-    async function sendTonPayment(){if(!tonConnectUI.connected)return tonConnectUI.openModal();if(!state.tonLink)return setReceiptStatus("Resolve an ENS name before sending.","error");try{const result=await tonConnectUI.sendTransaction({validUntil:Math.floor(Date.now()/1000)+300,messages:[{address:CONFIG.tonRecipient,amount:toNano(state.amount),payload:null}]});const receipt={ens:state.ens,amount:state.amount,resolvedAddress:state.resolvedAddress,boc:result.boc||"",recipient:CONFIG.tonRecipient,tonviewer:`${CONFIG.tonExplorer}/${CONFIG.tonRecipient}`};state.receipt=JSON.stringify(receipt);await cloudSet("enspay:last_receipt",state.receipt);setReceiptStatus(`Wallet submitted. Explorer: ${receipt.tonviewer}`,"ok");if(tg.showAlert)tg.showAlert("TON payment submitted. Receipt stored in Telegram CloudStorage.");}catch(err){setReceiptStatus(err?.message||"Wallet rejected or failed to send transaction.","error");}}
-    tonConnectUI.onStatusChange(wallet=>{setWalletStatus(wallet?`Wallet connected: ${wallet.account.address.slice(0,10)}...`:"Connect a TON wallet to send the payment from this Mini App.",wallet?"ok":"");if(state.tonLink&&wallet){tg.MainButton.setText(`Pay ${formatTon(state.amount)} to ${state.ens}`);tg.MainButton.show();}});
+    async function handleResolve(){const ens=els.ensInput.value.trim().toLowerCase(),amount=els.amountInput.value.trim();if(!ens.endsWith(".eth"))return setStatus("Enter a valid .eth name.","error");if(!amount||Number(amount)<=0)return setStatus("Enter a valid TON amount.","error");setStatus(`Resolving ${ens}...`);els.resolveBtn.disabled=true;try{state.ens=ens;state.amount=amount;state.resolvedAddress=await resolveEns(ens);showInvoice();await persistInvoice();setStatus(`Resolved ${ens}. Ready for TON testnet payment.`,"ok");}catch(_e){setStatus("Could not resolve this ENS name right now. Try vitalik.eth.","error");}finally{els.resolveBtn.disabled=false;}}
+    async function sendTonPayment(){if(!tonConnectUI.connected)return tonConnectUI.openModal();const wallet=tonConnectUI.wallet;if(wallet?.account?.chain!==CONFIG.tonNetwork)return setReceiptStatus("Connected wallet is not on TON testnet. Switch the wallet to testnet and reconnect.","error");if(!state.tonLink)return setReceiptStatus("Resolve an ENS name before sending.","error");try{const result=await tonConnectUI.sendTransaction({validUntil:Math.floor(Date.now()/1000)+300,network:CONFIG.tonNetwork,messages:[{address:CONFIG.tonRecipient,amount:toNano(state.amount)}]});const receipt={ens:state.ens,amount:state.amount,resolvedAddress:state.resolvedAddress,boc:result.boc||"",recipient:CONFIG.tonRecipient,explorer:CONFIG.tonExplorer};state.receipt=JSON.stringify(receipt);await cloudSet("enspay:last_receipt",state.receipt);setReceiptStatus(`Testnet wallet submitted the transaction. Explorer: ${receipt.explorer}`,"ok");if(tg.showAlert)tg.showAlert("TON testnet payment submitted. Receipt stored in Telegram CloudStorage.");}catch(err){setReceiptStatus(err?.message||"Wallet rejected or failed to send transaction.","error");}}
+    tonConnectUI.onStatusChange(wallet=>{if(wallet){const chainLabel=wallet.account.chain===CONFIG.tonNetwork?"testnet":"wrong network";setWalletStatus(`Wallet connected: ${wallet.account.address.slice(0,10)}... (${chainLabel})`,wallet.account.chain===CONFIG.tonNetwork?"ok":"error");}else{setWalletStatus("Connect a TON testnet wallet to send the payment from this Mini App.");}if(state.tonLink&&wallet&&wallet.account.chain===CONFIG.tonNetwork){tg.MainButton.setText(`Pay ${formatTon(state.amount)} to ${state.ens}`);tg.MainButton.show();}else if(!wallet||wallet.account.chain!==CONFIG.tonNetwork){tg.MainButton.hide();}});
     tg.onEvent("mainButtonClicked",sendTonPayment);
     els.resolveBtn.addEventListener("click",handleResolve);
     els.copyLinkBtn.addEventListener("click",async()=>{if(!state.tonLink)return;await navigator.clipboard.writeText(state.tonLink);setStatus("TON payment link copied.","ok");});
