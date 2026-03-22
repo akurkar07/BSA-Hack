@@ -75,7 +75,7 @@
 
   <script>
     const tg=window.Telegram.WebApp;tg.expand();tg.ready();
-    const CONFIG={tonRecipient:"UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ",rpcUrls:["https://eth.llamarpc.com","https://ethereum.publicnode.com"],tonExplorer:"https://tonviewer.com",botUsername:""};
+    const CONFIG={tonRecipient:"UQA1y_vDKWgcJPxTLcXWPqceNrZaXQoqMdAyL_hQyK6qb_hf",rpcUrls:["https://eth.llamarpc.com","https://ethereum.publicnode.com"],tonExplorer:"https://tonviewer.com",botUsername:""};
     const state={ens:"",amount:"",resolvedAddress:"",tonLink:"",receipt:""};
     const els={ensInput:document.getElementById("ensInput"),amountInput:document.getElementById("amountInput"),resolveBtn:document.getElementById("resolveBtn"),status:document.getElementById("status"),walletStatus:document.getElementById("walletStatus"),invoiceCard:document.getElementById("invoiceCard"),invoiceTitle:document.getElementById("invoiceTitle"),ensValue:document.getElementById("ensValue"),resolvedValue:document.getElementById("resolvedValue"),tonValue:document.getElementById("tonValue"),amountValue:document.getElementById("amountValue"),qrImage:document.getElementById("qrImage"),copyLinkBtn:document.getElementById("copyLinkBtn"),resetBtn:document.getElementById("resetBtn"),receiptCard:document.getElementById("receiptCard"),receiptOutput:document.getElementById("receiptOutput")};
     const cloudGet=key=>new Promise(resolve=>tg.CloudStorage.getItem(key,(_e,v)=>resolve(v||"")));
